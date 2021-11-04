@@ -2,6 +2,9 @@
 ##Novmeber 4, 2021
 ##M Tarjan
 
+##when need to update github credentials
+##https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r/
+
 ##Import all models that need/needed review
 ##start with FWS SE project
 
