@@ -1,0 +1,23 @@
+---
+title: "Species Habitat Model Review Progress"
+author: "Max Tarjan"
+date: "November 29, 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=F, message=F}
+if (!exists(x="species.reviews")) {source("Model_Review_Management_Code.R")}
+fig.mrt
+fig.reviewers
+print(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "CURRENT.STATUS")))
+```
+
+```{r, echo=F, warning=F, message=F}
+#kable(subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "CURRENT.STATUS")), row.names = F)
+```
