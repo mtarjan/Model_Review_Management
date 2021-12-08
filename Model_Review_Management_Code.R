@@ -11,7 +11,7 @@ library(readxl)
 library(tidyverse)
 species.fws<-read_excel("Data/USFWS_SE_Species_Model_Status_Report_JonO_20211208.xlsx", sheet =
              NULL) %>% data.frame()
-species.fws$Project<-"FSW SE"
+species.fws$Project<-"FWS SE"
 
 ##add BLM Year 1 species list
 species.blm<-read_excel("Data/BLMSSS-Year1-models-delivered_20211005.xlsx", sheet =
