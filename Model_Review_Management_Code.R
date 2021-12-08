@@ -119,7 +119,7 @@ data.plot <- data.plot %>%
   mutate(lab.ypos = cumsum(prop) - 0.5*prop)
 data.plot
 
-mycols <- c("#EFC000FF", "#0073C2FF", "#868686FF", "#CD534CFF")
+mycols <- c("gold", "chartreuse3", "green4", "darkgreen")
 fig.reviewers <- ggplot(data.plot, aes(x = 2, y = prop, fill = n.reviewer.cat)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
