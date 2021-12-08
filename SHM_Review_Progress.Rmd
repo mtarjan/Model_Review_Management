@@ -1,10 +1,11 @@
 ---
 title: "Species Habitat Model Review Progress"
 author: "Max Tarjan"
-date: "November 29, 2021"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
   html_document: default
   pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
@@ -15,7 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 if (!exists(x="species.reviews")) {source("Model_Review_Management_Code.R")}
 fig.mrt
 fig.reviewers
-print(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "Project")))
+fig.n.reviews
+print(unique(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "n.reviews", "Project"))))
 ```
 
 ```{r, echo=F, warning=F, message=F}

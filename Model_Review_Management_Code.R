@@ -37,17 +37,33 @@ mrt<-mrt[,1:4]
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
 
-model.reviewers<-dplyr::full_join(x = species, y = subset(mrt, cutecode %in% species$cutecode))
+##ADD MODEL REVIEWS; HOW MANY MODELS HAVE REVIEWS IN MRT2?
+reviews<-read_excel("Data/OverallFeedbackRaster-20211208.xlsx", sheet = NULL) %>% data.frame()
+reviews$cutecode.model<-reviews$Species
+reviews$cutecode<-str_split(reviews$cutecode.model, pattern = "_", simplify = T)[,1]
+reviews$reviewed<-TRUE
+
+##add mrt assignments to species
+assigned.reviewers<-dplyr::full_join(x = species, y = subset(mrt, cutecode %in% species$cutecode))
 
 ##summarize the number of model reviewers assigned per species
-n.reviewers<- model.reviewers %>% group_by(cutecode) %>% summarise(n.reviewer=length(unique(na.omit(Reviewer)))) %>% data.frame()
+n.reviewers<- assigned.reviewers %>% group_by(cutecode) %>% summarise(n.reviewer=length(unique(na.omit(Reviewer)))) %>% data.frame()
+
+##summarize number of reviews per species
+n.reviews<- reviews %>% group_by(cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame()
 
 species.reviews<-left_join(x=species, y = n.reviewers)
 species.reviews<-left_join(x=species.reviews, y=mrt.models.sub)
-##add false for models that are not in MRT2
+species.reviews<-left_join(x=species.reviews, y=subset(reviews, select=c("cutecode","UserID", "reviewed")))
+species.reviews<-left_join(x=species.reviews, y=n.reviews)
+##add false for models that are not in MRT2 or not reviewed
 species.reviews$mrt2[which(is.na(species.reviews$mrt2))]<-F
+species.reviews$reviewed[which(is.na(species.reviews$reviewed))]<-F
+##add 0 for species with no reviews
+species.reviews$n.reviews[which(is.na(species.reviews$n.reviews))]<-0
 
-subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer"))
+subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "reviewed", "n.reviews"))
+
 ##Output
 ##for each model: which reviewers are assigned? which reviewers completed their review? model feedback? next step?
 ##dataframe. record is a model
@@ -84,7 +100,7 @@ data.plot <- data.plot %>%
   mutate(lab.ypos = cumsum(prop) - 0.5*prop)
 data.plot
 
-mycols <- c("#EFC000FF", "#0073C2FF", "#868686FF", "#CD534CFF")
+mycols <- c("gold", "#0073C2FF")
 fig.mrt <- ggplot(data.plot, aes(x = 2, y = prop, fill = mrt2)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
@@ -104,9 +120,6 @@ fig.mrt
 species.reviews$n.reviewer.cat<-species.reviews$n.reviewer ##categorize number of reviewers
 species.reviews$n.reviewer.cat[which(species.reviews$n.reviewer.cat>2)]<-"3+"
 ##summarize data to get count of each reviewer number category and proportion
-#data.plot<-data.plot$n.reviewer.cat %>% table() %>% data.frame()
-#colnames(data.plot)<-c("n.reviewer", "Freq")
-#data.plot$prop<-data.plot$Freq/sum(data.plot$Freq)
 data.plot <- species.reviews %>% group_by(Project) %>% count(n.reviewer.cat) %>% data.frame()
 data.plot2 <- species.reviews %>% count(Project) %>% data.frame()
 colnames(data.plot2)<-c("Project", "sum")
@@ -129,3 +142,56 @@ fig.reviewers <- ggplot(data.plot, aes(x = 2, y = prop, fill = n.reviewer.cat)) 
   theme_void() +
   xlim(.5, 2.5)
 fig.reviewers
+
+##COMPLETED REVIEW (T/F)
+data.plot <- species.reviews %>% group_by(Project) %>% count(reviewed) %>% data.frame()
+data.plot2 <- species.reviews %>% count(Project) %>% data.frame()
+colnames(data.plot2)<-c("Project", "sum")
+data.plot <- left_join(x=data.plot, y=data.plot2)
+data.plot$prop<-data.plot$n/data.plot$sum
+
+##get the label positions
+data.plot <- data.plot %>%
+  group_by(Project) %>%
+  arrange(desc(reviewed)) %>%
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop)
+data.plot
+
+#mycols <- c("#EFC000FF", "#0073C2FF", "#868686FF", "#CD534CFF")
+mycols <- c("gold", "#0073C2FF")
+fig.review <- ggplot(data.plot, aes(x = 2, y = prop, fill = reviewed)) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0)+
+  geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
+  facet_wrap(facets=.~Project) +
+  scale_fill_manual(values = mycols, name="Reviewed") +
+  theme_void() +
+  xlim(.5, 2.5)
+fig.review
+
+##NUMBER OF COMPLETE REVIEWS (# OF USERIDS THAT COMPLETED REVIEWS)
+##categorize n.reviews
+species.reviews$n.reviews.cat<-species.reviews$n.reviews ##categorize number of reviewers
+species.reviews$n.reviews.cat[which(species.reviews$n.reviews.cat>2)]<-"3+"
+data.plot <- species.reviews %>% group_by(Project) %>% count(n.reviews.cat) %>% data.frame()
+data.plot2 <- species.reviews %>% count(Project) %>% data.frame()
+colnames(data.plot2)<-c("Project", "sum")
+data.plot <- left_join(x=data.plot, y=data.plot2)
+data.plot$prop<-data.plot$n/data.plot$sum
+
+data.plot <- data.plot %>%
+  group_by(Project) %>%
+  arrange(desc(n.reviews.cat)) %>%
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop)
+data.plot
+
+mycols <- c("gold", "chartreuse3", "green4", "darkgreen")
+fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.reviews.cat))) +
+  geom_bar(stat = "identity", color = "white") +
+  coord_polar(theta = "y", start = 0)+
+  geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
+  facet_wrap(facets=.~Project)+
+  scale_fill_manual(values = mycols, name="Number of\nReviews Completed") +
+  theme_void() +
+  xlim(.5, 2.5)
+fig.n.reviews
