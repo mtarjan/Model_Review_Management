@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 if (!exists(x="species.reviews")) {source("Model_Review_Management_Code.R")}
 fig.mrt
 fig.reviewers
-print(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "CURRENT.STATUS")))
+print(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "Project")))
 ```
 
 ```{r, echo=F, warning=F, message=F}

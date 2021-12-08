@@ -1,4 +1,5 @@
 ## Creating reviewer permissions table for upload to SpeciesbyReviewers raster on ArcGIS online
+## Created by GR; modified by MT
 ### Load libraries
 library(tidyverse)
 #library(googlesheets4)

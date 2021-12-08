@@ -9,9 +9,17 @@
 ##start with FWS SE project
 library(readxl)
 library(tidyverse)
-species<-read_excel("Data/USFWS_SE_Modeling_Status_JonO_Nov2021.xlsx", sheet =
+species.fws<-read_excel("Data/USFWS_SE_Species_Model_Status_Report_JonO_20211208.xlsx", sheet =
              NULL) %>% data.frame()
-species$Project<-"FSW SE"
+species.fws$Project<-"FSW SE"
+
+##add BLM Year 1 species list
+species.blm<-read_excel("Data/BLMSSS-Year1-models-delivered_20211005.xlsx", sheet =
+                      NULL) %>% data.frame()
+species.blm$Project<-"BLM SSS"
+colnames(species.blm)<-c("Taxa", "Scientific.Name", "Common.Name", "cutecode", "Project")
+
+species<-rbind(subset(species.fws, select = names(species.blm)), species.blm)
 
 ##Import reviewer sign ups from reviewer sign up tool
 ##Import models in MRT2
@@ -24,7 +32,7 @@ mrt.models$mrt2<-T
 mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20211112.xls") %>% data.frame()
+mrt<-read_excel("Data/SpeciesByReviewersRaster_20211207.xlsx") %>% data.frame()
 mrt<-mrt[,1:4]
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
@@ -39,7 +47,7 @@ species.reviews<-left_join(x=species.reviews, y=mrt.models.sub)
 ##add false for models that are not in MRT2
 species.reviews$mrt2[which(is.na(species.reviews$mrt2))]<-F
 
-subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "CURRENT.STATUS"))
+subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer"))
 ##Output
 ##for each model: which reviewers are assigned? which reviewers completed their review? model feedback? next step?
 ##dataframe. record is a model
@@ -58,11 +66,20 @@ subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "CURRE
 library(ggplot2)
 
 ##UPLOADED ON MRT
-data.plot<-species.reviews$mrt2 %>% table() %>% data.frame()
-colnames(data.plot)<-c("mrt2", "Freq")
-data.plot$prop<-data.plot$Freq/sum(data.plot$Freq)
+#data.plot<-species.reviews$mrt2 %>% table() %>% data.frame()
+#colnames(data.plot)<-c("mrt2", "Freq")
+#data.plot$prop<-data.plot$Freq/sum(data.plot$Freq)
 
+##alternative to include project
+data.plot <- species.reviews %>% group_by(Project) %>% count(mrt2) %>% data.frame()
+data.plot2 <- species.reviews %>% count(Project) %>% data.frame()
+colnames(data.plot2)<-c("Project", "sum")
+data.plot <- left_join(x=data.plot, y=data.plot2)
+data.plot$prop<-data.plot$n/data.plot$sum
+
+##get the label positions
 data.plot <- data.plot %>%
+  group_by(Project) %>%
   arrange(desc(mrt2)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5*prop)
 data.plot
@@ -71,7 +88,8 @@ mycols <- c("#EFC000FF", "#0073C2FF", "#868686FF", "#CD534CFF")
 fig.mrt <- ggplot(data.plot, aes(x = 2, y = prop, fill = mrt2)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
-  geom_text(aes(y = lab.ypos, label = paste0("n = ", Freq, ", \n", round(prop*100,0), "%")), color = "white")+
+  geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
+  facet_wrap(facets=.~Project) +
   scale_fill_manual(values = mycols, name="Uploaded to MRT") +
   theme_void() +
   xlim(.5, 2.5)
@@ -83,23 +101,30 @@ fig.mrt
 #  theme_classic()
 #fig
 
-data.plot<-species.reviews
-data.plot$n.reviewer.cat<-data.plot$n.reviewer
-data.plot$n.reviewer.cat[which(data.plot$n.reviewer.cat>2)]<-"3+"
-data.plot<-data.plot$n.reviewer.cat %>% table() %>% data.frame()
-colnames(data.plot)<-c("n.reviewer", "Freq")
-data.plot$prop<-data.plot$Freq/sum(data.plot$Freq)
+species.reviews$n.reviewer.cat<-species.reviews$n.reviewer ##categorize number of reviewers
+species.reviews$n.reviewer.cat[which(species.reviews$n.reviewer.cat>2)]<-"3+"
+##summarize data to get count of each reviewer number category and proportion
+#data.plot<-data.plot$n.reviewer.cat %>% table() %>% data.frame()
+#colnames(data.plot)<-c("n.reviewer", "Freq")
+#data.plot$prop<-data.plot$Freq/sum(data.plot$Freq)
+data.plot <- species.reviews %>% group_by(Project) %>% count(n.reviewer.cat) %>% data.frame()
+data.plot2 <- species.reviews %>% count(Project) %>% data.frame()
+colnames(data.plot2)<-c("Project", "sum")
+data.plot <- left_join(x=data.plot, y=data.plot2)
+data.plot$prop<-data.plot$n/data.plot$sum
 
 data.plot <- data.plot %>%
-  arrange(desc(n.reviewer)) %>%
+  group_by(Project) %>%
+  arrange(desc(n.reviewer.cat)) %>%
   mutate(lab.ypos = cumsum(prop) - 0.5*prop)
 data.plot
 
 mycols <- c("#EFC000FF", "#0073C2FF", "#868686FF", "#CD534CFF")
-fig.reviewers <- ggplot(data.plot, aes(x = 2, y = prop, fill = n.reviewer)) +
+fig.reviewers <- ggplot(data.plot, aes(x = 2, y = prop, fill = n.reviewer.cat)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
-  geom_text(aes(y = lab.ypos, label = paste0("n = ", Freq, ", \n", round(prop*100,0), "%")), color = "white")+
+  geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
+  facet_wrap(facets=.~Project)+
   scale_fill_manual(values = mycols, name="Number of\nReviewers Assigned") +
   theme_void() +
   xlim(.5, 2.5)
