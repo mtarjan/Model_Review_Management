@@ -21,11 +21,18 @@ colnames(species.blm)<-c("Taxa", "Scientific.Name", "Common.Name", "cutecode", "
 
 species<-rbind(subset(species.fws, select = names(species.blm)), species.blm)
 
+##add DoD species
+species.dod<-read_excel("Data/DoD-Species-20211213.xlsx", sheet =
+                          NULL) %>% data.frame()
+colnames(species.dod)<-c("Group", "Scientific.Name", "Common.Name", "G.rank","cutecode", "Project")
+species.dod$Taxa<-NA
+species<-rbind(species, subset(species.dod, select = names(species)))
+
 ##Import reviewer sign ups from reviewer sign up tool
 ##Import models in MRT2
 ##SpeciesMasterLookupRaster on arcgis online; open in arcgis pro; Analysis > Tools > table to excel
 #mrt.models<-read_excel("Data/MRT2-SpeciesMasterLookupRaster-29112021.xlsx") %>% data.frame() ##these models have not necessarily been uploaded to MRT2, just entered
-mrt.models<-read_excel("Data/MRT2-DataLoadDateRaster-29112021.xlsx") %>% data.frame()
+mrt.models<-read_excel("Data/MRT2-DataLoadDateRaster-20211213.xlsx") %>% data.frame()
 mrt.models$cutecode.model<-mrt.models$cutecode
 mrt.models$cutecode<-str_split(mrt.models$cutecode.model, pattern = "_", simplify = T)[,1]
 mrt.models$mrt2<-T
