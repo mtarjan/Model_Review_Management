@@ -39,7 +39,7 @@ mrt.models$mrt2<-T
 mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20211207.xlsx") %>% data.frame()
+mrt<-read_excel("Data/SpeciesByReviewersRaster_20211216.xlsx") %>% data.frame()
 mrt<-mrt[,1:4]
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]

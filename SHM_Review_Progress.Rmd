@@ -3,8 +3,8 @@ title: "Species Habitat Model Review Progress"
 author: "Max Tarjan"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 
@@ -17,7 +17,7 @@ if (!exists(x="species.reviews")) {source("Model_Review_Management_Code.R")}
 fig.mrt
 fig.reviewers
 fig.n.reviews
-print(unique(subset(species.reviews, select=c("Common.Name", "mrt2", "n.reviewer", "n.reviews", "Project"))))
+print(unique(subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "n.reviews", "Project"))))
 ```
 
 ```{r, echo=F, warning=F, message=F}

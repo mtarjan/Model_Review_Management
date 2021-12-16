@@ -2,13 +2,14 @@
 ## Created by GR; modified by MT
 ### Load libraries
 library(tidyverse)
+library(readxl)
 #library(googlesheets4)
 
 ### Load data
 #reviewer_signup <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/14oq_KQxD8KiOjg-RxrPdMplNUBHhBq3QJk3bU57xByU/edit?usp=sharing") 
 reviewer_signup <- read.csv("Data/Model Reviewer Sign Up Form - Responses - Sheet1.csv")
-SpeciesMasterLookupRaster <- read_csv("Data/SpeciesMasterLookupRaster.csv") %>% 
-  dplyr::mutate(species = strsplit((strsplit(`Scientific Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
+SpeciesMasterLookupRaster <- read_excel("Data/SpeciesMasterLookupRaster-20211216.xls") %>%
+  dplyr::mutate(species = strsplit((strsplit(`Scientific_Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 
 ### Generate reviewer permissions table
 #### Format required: ELEMENT_GLOBAL_ID, cutecode, Reviewer, Reviewer email, SpeciesMasterLookupKey, 
