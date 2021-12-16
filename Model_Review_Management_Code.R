@@ -61,7 +61,7 @@ n.reviews<- reviews %>% group_by(cutecode) %>% summarise(n.reviews=length(unique
 
 species.reviews<-left_join(x=species, y = n.reviewers)
 species.reviews<-left_join(x=species.reviews, y=mrt.models.sub)
-species.reviews<-left_join(x=species.reviews, y=subset(reviews, select=c("cutecode","UserID", "reviewed")))
+species.reviews<-left_join(x=species.reviews, y=unique(subset(reviews, select=c("cutecode","reviewed"))))
 species.reviews<-left_join(x=species.reviews, y=n.reviews)
 ##add false for models that are not in MRT2 or not reviewed
 species.reviews$mrt2[which(is.na(species.reviews$mrt2))]<-F
