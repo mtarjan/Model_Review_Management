@@ -39,13 +39,13 @@ mrt.models$mrt2<-T
 mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20211216.xlsx") %>% data.frame()
-mrt<-mrt[,1:4]
+mrt<-read_excel("Data/SpeciesByReviewersRaster_20211220.xlsx") %>% data.frame()
+mrt<-mrt[,1:4] %>% unique()
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
 
 ##ADD MODEL REVIEWS; HOW MANY MODELS HAVE REVIEWS IN MRT2?
-reviews<-read_excel("Data/OverallFeedbackRaster-20211208.xlsx", sheet = NULL) %>% data.frame()
+reviews<-read_excel("Data/OverallFeedbackRaster-20211220.xlsx", sheet = NULL) %>% data.frame()
 reviews$cutecode.model<-reviews$Species
 reviews$cutecode<-str_split(reviews$cutecode.model, pattern = "_", simplify = T)[,1]
 reviews$reviewed<-TRUE
@@ -104,7 +104,8 @@ data.plot$prop<-data.plot$n/data.plot$sum
 data.plot <- data.plot %>%
   group_by(Project) %>%
   arrange(desc(mrt2)) %>%
-  mutate(lab.ypos = cumsum(prop) - 0.5*prop)
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop) %>%
+  data.frame()
 data.plot
 
 mycols <- c("gold", "#0073C2FF")
@@ -112,7 +113,7 @@ fig.mrt <- ggplot(data.plot, aes(x = 2, y = prop, fill = mrt2)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
   geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
-  facet_wrap(facets=.~Project) +
+  facet_wrap(.~Project, ncol=3) +
   scale_fill_manual(values = mycols, name="Uploaded to MRT") +
   theme_void() +
   xlim(.5, 2.5)
@@ -144,7 +145,7 @@ fig.reviewers <- ggplot(data.plot, aes(x = 2, y = prop, fill = n.reviewer.cat)) 
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
   geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
-  facet_wrap(facets=.~Project)+
+  facet_wrap(facets=.~Project, ncol=3)+
   scale_fill_manual(values = mycols, name="Number of\nReviewers Assigned") +
   theme_void() +
   xlim(.5, 2.5)
@@ -170,7 +171,7 @@ fig.review <- ggplot(data.plot, aes(x = 2, y = prop, fill = reviewed)) +
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
   geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
-  facet_wrap(facets=.~Project) +
+  facet_wrap(facets=.~Project, ncol=3) +
   scale_fill_manual(values = mycols, name="Reviewed") +
   theme_void() +
   xlim(.5, 2.5)
@@ -197,7 +198,7 @@ fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.re
   geom_bar(stat = "identity", color = "white") +
   coord_polar(theta = "y", start = 0)+
   geom_text(aes(y = lab.ypos, label = paste0("n = ", n, ", \n", round(prop*100,0), "%")), color = "white")+
-  facet_wrap(facets=.~Project)+
+  facet_wrap(facets=.~Project, ncol=3)+
   scale_fill_manual(values = mycols, name="Number of\nReviews Completed") +
   theme_void() +
   xlim(.5, 2.5)
