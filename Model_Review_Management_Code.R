@@ -30,6 +30,12 @@ colnames(species.dod)<-c("Group", "Scientific.Name", "Common.Name", "G.rank","cu
 species.dod$Taxa<-NA
 species<-rbind(species, subset(species.dod, select = names(species)))
 
+##add list of species to see if there is overlap with mobi models or other projects
+spp<-read_excel("Data/WildlifeConservationInitiative-species-20220131.xlsx") %>% data.frame()
+spp<-data.frame(Taxa=NA, Scientific.Name=spp$Scientific.Name, Common.Name=spp$Common.Name, cutecode=spp$cutecode, Project="WCI")
+
+species<-rbind(species, spp)
+
 ##Import reviewer sign ups from reviewer sign up tool
 ##Import models in MRT2
 ##SpeciesMasterLookupRaster on arcgis online; open in arcgis pro; Analysis > Tools > table to excel
@@ -206,15 +212,13 @@ fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.re
   xlim(.5, 2.5)
 fig.n.reviews
 
-##add list of species to see if there is overlap with mobi models or other projects
-spp<-read_excel("Data/WildlifeConservationInitiative-species-20220131.xlsx") %>% data.frame()
-
 ##add list of mobi models
 mobimodels<-read_excel("G:/tarjan/SHM-Pro/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
 colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
 
 ##add whether species are associated with mobi or another project
-spp<-left_join(x=spp, y=subset(species, select=c("Scientific.Name", "Project")))
+spp<-subset(species.reviews, Project=="WCI", select=-c(Project, Taxa, n.reviewer.cat, n.reviews.cat))
+spp<-left_join(x=spp, y=subset(species, select=c("Scientific.Name", "Project"), subset = Project !="WCI"))
 spp<-left_join(x=spp, y=subset(mobimodels, select=c("Scientific Name", "Included.in.MoBI","Count.of.Reviews", "Preliminary.Model.Assessment")), by = c("Scientific.Name"="Scientific Name"))
 
 write.csv(spp, "Outputs/WildlifeConservationInitiative-species-20220131.csv", row.names = F, na="")
