@@ -9,6 +9,8 @@
 ##start with FWS SE project
 library(readxl)
 library(tidyverse)
+
+##add species from all existing projects
 species.fws<-read_excel("Data/USFWS_SE_Species_Model_Status_Report_JonO_20211208.xlsx", sheet =
              NULL) %>% data.frame()
 species.fws$Project<-"FWS SE"
@@ -203,3 +205,16 @@ fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.re
   theme_void() +
   xlim(.5, 2.5)
 fig.n.reviews
+
+##add list of species to see if there is overlap with mobi models or other projects
+spp<-read_excel("Data/WildlifeConservationInitiative-species-20220131.xlsx") %>% data.frame()
+
+##add list of mobi models
+mobimodels<-read_excel("G:/tarjan/SHM-Pro/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
+colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
+
+##add whether species are associated with mobi or another project
+spp<-left_join(x=spp, y=subset(species, select=c("Scientific.Name", "Project")))
+spp<-left_join(x=spp, y=subset(mobimodels, select=c("Scientific Name", "Included.in.MoBI","Count.of.Reviews", "Preliminary.Model.Assessment")), by = c("Scientific.Name"="Scientific Name"))
+
+write.csv(spp, "Outputs/WildlifeConservationInitiative-species-20220131.csv", row.names = F, na="")
