@@ -8,7 +8,7 @@ library(readxl)
 ### Load data
 #reviewer_signup <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/14oq_KQxD8KiOjg-RxrPdMplNUBHhBq3QJk3bU57xByU/edit?usp=sharing") 
 reviewer_signup <- read.csv("Data/Model Reviewer Sign Up Form - Responses - Sheet1.csv")
-SpeciesMasterLookupRaster <- read_excel("Data/SpeciesMasterLookupRaster-20211220.xls") %>%
+SpeciesMasterLookupRaster <- read_excel("Data/SpeciesMasterLookupRaster-20220202.xls") %>%
   dplyr::mutate(species = strsplit((strsplit(`Scientific_Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 
 ### Generate reviewer permissions table
@@ -29,7 +29,7 @@ reviewer_permissions_table <- inner_join(unique_review_species_Lookup, reviewers
   arrange(Reviewer) %>% unique()
 
 ##remove permissions that already exist
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20211216.xlsx") %>% data.frame()
+mrt<-read_excel("Data/SpeciesByReviewersRaster_20211220.xlsx") %>% data.frame()
 mrt<-mrt[,1:5]
 colnames(mrt)<-colnames(reviewer_permissions_table)
 
