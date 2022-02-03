@@ -48,7 +48,7 @@ yr2.spp <- subset(blm.mobi,
 )
 dim(yr2.spp)
 dim(subset(yr2.spp, Taxonomic.Group != "Plant"))
-subset(yr2.spp, select=c("Taxonomic.Group", "Common.Name", "Global.Rank..18July2020.", "ESA.Status..18Jul2020.", "Prop.on.BLM.Lands.West", "states"), Taxonomic.Group!="Plant") %>% arrange(Common.Name)
+subset(yr2.spp, select=c("Taxonomic.Group", "Common.Name", "Global.Rank..18July2020.", "ESA.Status..18Jul2020.", "Prop.on.BLM.Lands.West", "Included.in.MoBI", "states")) %>% arrange(Common.Name)
 
 data.write<-subset(yr2.spp, select=c("Element.Global.ID", "Taxonomic.Group", "Scientific.Name", "Common.Name", "Global.Rank..18July2020.", "ESA.Status..18Jul2020.", "Prop.on.BLM.Lands.West", "states")) %>% arrange(Common.Name)
 names(data.write)<-c("Element.Global.ID", "Taxonomic.Group", "Scientific.Name", "Common.Name", "Global.Rank", "ESA.Status", "Prop.on.BLM.Lands.West", "States")
