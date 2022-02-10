@@ -32,13 +32,13 @@ blm.mobi<-dplyr::left_join(x = blm.spp, y = mobi)
 
 ##get a list of species to model in Year 2
 yr2.spp <- subset(blm.mobi, 
-                      (str_detect(Global.Rank..18July2020., "G1") | str_detect(Global.Rank..18July2020., "G2"))
-                      #& Taxonomic.Group != "Plant"
+                      (str_detect(Global.Rank..18July2020., "G1") | str_detect(Global.Rank..18July2020., "G2") | str_detect(Global.Rank..18July2020., "G3"))
+                      & Taxonomic.Group != "Plant"
                       #& str_length(states) >2
                       & (str_length(states) >2 | Taxonomic.Group != "Plant")
-                      & as.numeric(Prop.on.BLM.Lands.West) >= 0.25
+                      & as.numeric(Prop.on.BLM.Lands.West) >= 0.2
                       & !(Scientific.Name %in% unique(blm.spp.y1$scientific_name))
-                      & Total.Occurrences.Rangewide >= 5 ##guessing at the number
+                      & Total.Occurrences.Rangewide >= 3 ##guessing at the number
                       & !(ESA.Status..18Jul2020. %in% c("-", "DL"))
                       #& Included.in.MoBI == "yes"
                       #& !is.na(Included.in.MoBI)
@@ -53,4 +53,4 @@ subset(yr2.spp, select=c("Taxonomic.Group", "Common.Name", "Global.Rank..18July2
 data.write<-subset(yr2.spp, select=c("Element.Global.ID", "Taxonomic.Group", "Scientific.Name", "Common.Name", "Global.Rank..18July2020.", "ESA.Status..18Jul2020.", "Prop.on.BLM.Lands.West", "states")) %>% arrange(Common.Name)
 names(data.write)<-c("Element.Global.ID", "Taxonomic.Group", "Scientific.Name", "Common.Name", "Global.Rank", "ESA.Status", "Prop.on.BLM.Lands.West", "States")
 
-write.csv(data.write, file = "BLM_year2_species_list_20220201.csv", row.names=F)
+write.csv(data.write, file = "BLM_year2_model_animals_20220210.csv", row.names=F)
