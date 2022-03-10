@@ -40,20 +40,20 @@ species<-rbind(species, subset(species.dod, select = names(species)))
 ##Import models in MRT2
 ##SpeciesMasterLookupRaster on arcgis online; open in arcgis pro; Analysis > Tools > table to excel
 #mrt.models<-read_excel("Data/MRT2-SpeciesMasterLookupRaster-29112021.xlsx") %>% data.frame() ##these models have not necessarily been uploaded to MRT2, just entered
-mrt.models<-read_excel("Data/DataLoadDateRaster-20220214.xlsx") %>% data.frame()
+mrt.models<-read_excel("Data/DataLoadDateRaster-20220309.xls") %>% data.frame()
 mrt.models$cutecode.model<-mrt.models$cutecode
 mrt.models$cutecode<-str_split(mrt.models$cutecode.model, pattern = "_", simplify = T)[,1]
 mrt.models$mrt2<-T
 mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20220214.xlsx") %>% data.frame()
+mrt<-read_excel("Data/SpeciesByReviewersRaster_20220309.xls") %>% data.frame()
 mrt<-mrt[,1:4] %>% unique()
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
 
 ##ADD MODEL REVIEWS; HOW MANY MODELS HAVE REVIEWS IN MRT2?
-reviews<-read_excel("Data/OverallFeedbackRaster-20220214.xlsx", sheet = NULL) %>% data.frame()
+reviews<-read_excel("Data/OverallFeedbackRaster-20220309.xls", sheet = NULL) %>% data.frame()
 reviews$cutecode.model<-reviews$Species
 reviews$cutecode<-str_split(reviews$cutecode.model, pattern = "_", simplify = T)[,1]
 reviews$reviewed<-TRUE
