@@ -5,10 +5,29 @@
 ##when need to update github credentials
 ##https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r/
 
+library(tidyverse)
+
+##connecting to AGOL tables
+##First, download the "arcgisbinding" package manually from GitHub: https://github.com/R-ArcGIS/r-bridge/releases/tag/v1.0.1.232. Second, install this package in Rstudio using the menu "Tools">"install packages", and then choose the downloaded package archive
+#install.packages("arcgisbinding", repos="https://r.esri.com", type="win.binary")
+library(arcgisbinding)
+arc.check_product()
+
+## Identify the appropriate Table URL
+### URL for the OverallFeedbackRaster table
+overall_feedback_url <- "https://services.arcgis.com/EVsTT4nNRCwmHNyb/arcgis/rest/services/OverallFeedbackRaster/FeatureServer/0"
+### URL for the OverallFeedbackRaster table
+detailed_feedback_url <- "https://services.arcgis.com/EVsTT4nNRCwmHNyb/arcgis/rest/services/DetailedFeedbackRaster/FeatureServer/0"
+
+## Read in MRT tables
+### Read in OverallFeedbackRaster table
+overall_feedback_table <- arc.open(overall_feedback_url) %>% arc.select()
+### Read in OverallFeedbackRaster table
+detailed_feedback_table <- arc.open(detailed_feedback_url) %>% arc.select()
+
 ##Import all models that need/needed review
 ##start with FWS SE project
 library(readxl)
-library(tidyverse)
 
 ##add species from all existing projects
 species.fws<-read_excel("Data/USFWS_SE_Species_Model_Status_Report_JonO_20211208.xlsx", sheet =
@@ -40,20 +59,29 @@ species<-rbind(species, subset(species.dod, select = names(species)))
 ##Import models in MRT2
 ##SpeciesMasterLookupRaster on arcgis online; open in arcgis pro; Analysis > Tools > table to excel
 #mrt.models<-read_excel("Data/MRT2-SpeciesMasterLookupRaster-29112021.xlsx") %>% data.frame() ##these models have not necessarily been uploaded to MRT2, just entered
-mrt.models<-read_excel("Data/DataLoadDateRaster-20220309.xls") %>% data.frame()
+#mrt.models<-read_excel("Data/DataLoadDateRaster-20220309.xls") %>% data.frame()
+##alternative is to connect directly to online AGOL table
+mrt.models.url <- "https://services.arcgis.com/EVsTT4nNRCwmHNyb/arcgis/rest/services/DataLoadDateRaster/FeatureServer/0"
+## Read in MRT tables
+### Read in OverallFeedbackRaster table
+mrt.models <- arc.open(mrt.models.url) %>% arc.select()
+
 mrt.models$cutecode.model<-mrt.models$cutecode
 mrt.models$cutecode<-str_split(mrt.models$cutecode.model, pattern = "_", simplify = T)[,1]
 mrt.models$mrt2<-T
 mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
-mrt<-read_excel("Data/SpeciesByReviewersRaster_20220309.xls") %>% data.frame()
+#mrt<-read_excel("Data/SpeciesByReviewersRaster_20220309.xls") %>% data.frame()
+mrt.url <- "https://services.arcgis.com/EVsTT4nNRCwmHNyb/arcgis/rest/services/SpeciesbyReviewersRaster/FeatureServer/0"
+mrt <- arc.open(mrt.url) %>% arc.select()
 mrt<-mrt[,1:4] %>% unique()
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
 
 ##ADD MODEL REVIEWS; HOW MANY MODELS HAVE REVIEWS IN MRT2?
-reviews<-read_excel("Data/OverallFeedbackRaster-20220309.xls", sheet = NULL) %>% data.frame()
+#reviews<-read_excel("Data/OverallFeedbackRaster-20220309.xls", sheet = NULL) %>% data.frame()
+reviews<-overall_feedback_table
 reviews$cutecode.model<-reviews$Species
 reviews$cutecode<-str_split(reviews$cutecode.model, pattern = "_", simplify = T)[,1]
 reviews$reviewed<-TRUE
