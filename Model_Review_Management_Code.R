@@ -69,7 +69,7 @@ mrt.models <- arc.open(mrt.models.url) %>% arc.select()
 mrt.models$cutecode.model<-mrt.models$cutecode
 mrt.models$cutecode<-str_split(mrt.models$cutecode.model, pattern = "_", simplify = T)[,1]
 mrt.models$mrt2<-T
-mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2")) %>% unique()
+mrt.models.sub<-subset(mrt.models, select = c("cutecode", "mrt2", "ModelVersion")) %>% unique()
 ##Import reviewer assignments from Model Review Tool
 ##open in arcgis pro; Analysis > Tools > table to excel
 #mrt<-read_excel("Data/SpeciesByReviewersRaster_20220309.xls") %>% data.frame()
@@ -92,12 +92,13 @@ assigned.reviewers<-dplyr::full_join(x = species, y = subset(mrt, cutecode %in% 
 ##summarize the number of model reviewers assigned per species
 n.reviewers<- assigned.reviewers %>% group_by(cutecode) %>% summarise(n.reviewer=length(unique(na.omit(Reviewer)))) %>% data.frame()
 
-##summarize number of reviews per species
-n.reviews<- reviews %>% group_by(cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame()
+##summarize number of reviews per species (but might be for multiple model versions)
+#n.reviews<- reviews %>% group_by(cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame() ##older version that grouped by species instead of model version
+n.reviews<- reviews %>% group_by(ModelVersion, cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame()
 
 species.reviews<-left_join(x=species, y = n.reviewers)
-species.reviews<-left_join(x=species.reviews, y=mrt.models.sub)
-species.reviews<-left_join(x=species.reviews, y=unique(subset(reviews, select=c("cutecode","reviewed"))))
+species.reviews<-full_join(x=species.reviews, y=subset(mrt.models.sub, cutecode %in% species$cutecode))
+species.reviews<-left_join(x=species.reviews, y=unique(subset(reviews, select=c("ModelVersion","reviewed"))))
 species.reviews<-left_join(x=species.reviews, y=n.reviews)
 ##add false for models that are not in MRT2 or not reviewed
 species.reviews$mrt2[which(is.na(species.reviews$mrt2))]<-F
@@ -105,7 +106,7 @@ species.reviews$reviewed[which(is.na(species.reviews$reviewed))]<-F
 ##add 0 for species with no reviews
 species.reviews$n.reviews[which(is.na(species.reviews$n.reviews))]<-0
 
-subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "reviewed", "n.reviews"))
+subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "reviewed", "n.reviews"))
 
 ##Output
 ##for each model: which reviewers are assigned? which reviewers completed their review? model feedback? next step?
@@ -240,6 +241,8 @@ fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.re
   xlim(.5, 2.5)
 fig.n.reviews
 
+#write.csv(species.reviews, "Outputs/Fed-project-species-reviews-20220505.csv", row.names=F)
+
 ##add list of mobi models
 mobimodels<-read_excel("G:/tarjan/SHM-Pro/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
 colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
@@ -249,4 +252,4 @@ spp<-subset(species.reviews, Project=="WCI", select=-c(Project, Taxa, n.reviewer
 spp<-left_join(x=spp, y=subset(species, select=c("Scientific.Name", "Project"), subset = Project !="WCI"))
 spp<-left_join(x=spp, y=subset(mobimodels, select=c("Scientific Name", "Included.in.MoBI","Count.of.Reviews", "Preliminary.Model.Assessment")), by = c("Scientific.Name"="Scientific Name"))
 
-write.csv(spp, "Outputs/WildlifeConservationInitiative-species-20220131.csv", row.names = F, na="")
+#write.csv(spp, "Outputs/WildlifeConservationInitiative-species-20220131.csv", row.names = F, na="")

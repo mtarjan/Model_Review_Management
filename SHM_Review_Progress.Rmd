@@ -3,8 +3,8 @@ title: "Species Habitat Model Review Progress"
 author: "Max Tarjan"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 
@@ -12,14 +12,16 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, echo=F, message=F}
+```{r, echo=F, message=F, warning=FALSE}
 if (!exists(x="species.reviews")) {source("Model_Review_Management_Code.R")}
 fig.mrt
 fig.reviewers
 fig.n.reviews
-print(unique(subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "n.reviews", "Project"))))
+
 ```
 
+Table 1. Model versions uploaded to MRT (mrt2 = T), the number of reviewers assigned permissions (n.reviewer), and the number of reviews completed (n.reviews).
 ```{r, echo=F, warning=F, message=F}
+print(unique(subset(species.reviews, select=c("cutecode","ModelVersion", "mrt2", "n.reviewer", "n.reviews", "Project"))))
 #kable(subset(species.reviews, select=c("Scientific.Name", "mrt2", "n.reviewer", "CURRENT.STATUS")), row.names = F)
 ```
