@@ -244,7 +244,7 @@ fig.n.reviews
 #write.csv(species.reviews, "Outputs/Fed-project-species-reviews-20220505.csv", row.names=F)
 
 ##add list of mobi models
-mobimodels<-read_excel("G:/tarjan/SHM-Pro/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
+mobimodels<-read_excel("G:/tarjan/Species-select/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
 colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
 
 ##add whether species are associated with mobi or another project
