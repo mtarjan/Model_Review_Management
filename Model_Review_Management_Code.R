@@ -96,6 +96,10 @@ n.reviewers<- assigned.reviewers %>% group_by(cutecode) %>% summarise(n.reviewer
 #n.reviews<- reviews %>% group_by(cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame() ##older version that grouped by species instead of model version
 n.reviews<- reviews %>% group_by(ModelVersion, cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame()
 
+##write out reviewer info for hannah
+reviewer.contact <- reviews %>% subset(subset = cutecode %in% species$cutecode, select= c(UserID, cutecode, ModelVersion)) %>% data.frame(); head(reviewer.contact)
+write.csv(reviewer.contact, "Outputs/completedreviews-20220629.csv", row.names = F)
+
 species.reviews<-left_join(x=species, y = n.reviewers)
 species.reviews<-full_join(x=species.reviews, y=subset(mrt.models.sub, cutecode %in% species$cutecode))
 species.reviews<-left_join(x=species.reviews, y=unique(subset(reviews, select=c("ModelVersion","reviewed"))))
@@ -241,7 +245,7 @@ fig.n.reviews <- ggplot(data.plot, aes(x = 2, y = prop, fill = as.character(n.re
   xlim(.5, 2.5)
 fig.n.reviews
 
-#write.csv(species.reviews, "Outputs/Fed-project-species-reviews-20220505.csv", row.names=F)
+#write.csv(species.reviews, "Outputs/Fed-project-species-reviews-20220624.csv", row.names=F)
 
 ##add list of mobi models
 mobimodels<-read_excel("G:/tarjan/Species-select/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
