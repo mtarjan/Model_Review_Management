@@ -49,6 +49,10 @@ colnames(species.dod)<-c("Group", "Scientific.Name", "Common.Name", "G.rank","cu
 species.dod$Taxa<-NA
 species<-rbind(species, subset(species.dod, select = names(species)))
 
+##replace scientific name of elko rockcress
+#species$Scientific.Name[which(species$Common.Name=="Elko Rockcress")] <- "Boechera falcifructa"
+#species$cutecode[which(species$Common.Name=="Elko Rockcress")] <- "boecfalc"
+
 ##add list of species to see if there is overlap with mobi models or other projects
 #spp<-read_excel("Data/WildlifeConservationInitiative-species-20220131.xlsx") %>% data.frame()
 #spp<-data.frame(Taxa=NA, Scientific.Name=spp$Scientific.Name, Common.Name=spp$Common.Name, cutecode=spp$cutecode, Project="WCI")
