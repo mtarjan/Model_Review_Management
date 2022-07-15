@@ -114,7 +114,9 @@ species.reviews$reviewed[which(is.na(species.reviews$reviewed))]<-F
 ##add 0 for species with no reviews
 species.reviews$n.reviews[which(is.na(species.reviews$n.reviews))]<-0
 
-subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "reviewed", "n.reviews"))
+subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "n.reviews"))
+
+#write.csv(subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "n.reviews"), Project=="FWS SE"), "Outputs/FWSSE_modelreviewcounts_20220715.csv", row.names = F)
 
 ##Output
 ##for each model: which reviewers are assigned? which reviewers completed their review? model feedback? next step?
