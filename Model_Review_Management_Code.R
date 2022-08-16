@@ -49,6 +49,9 @@ colnames(species.dod)<-c("Group", "Scientific.Name", "Common.Name", "G.rank","cu
 species.dod$Taxa<-NA
 species<-rbind(species, subset(species.dod, select = names(species)))
 
+##remove pinyon jay and pygmy rabbit
+species<- subset(species, !(Common.Name %in% c("Pinyon Jay", "Pygmy Rabbit")))
+
 ##replace scientific name of elko rockcress
 #species$Scientific.Name[which(species$Common.Name=="Elko Rockcress")] <- "Boechera falcifructa"
 #species$cutecode[which(species$Common.Name=="Elko Rockcress")] <- "boecfalc"
@@ -256,6 +259,9 @@ fig.n.reviews
 ##add list of mobi models
 mobimodels<-read_excel("G:/tarjan/Species-select/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
 colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
+
+##view particular mobimodels
+subset(mobimodels, cutecode %in% c("faxohart", "procreim", "orcohart"), select = c(cutecode, Overal.All.Confidence, Model.Review, Preliminary.Model.Assessment))
 
 ##add whether species are associated with mobi or another project
 spp<-subset(species.reviews, Project=="WCI", select=-c(Project, Taxa, n.reviewer.cat, n.reviews.cat))
