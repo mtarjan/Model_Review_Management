@@ -55,6 +55,7 @@ species<- subset(species, !(Common.Name %in% c("Pinyon Jay", "Pygmy Rabbit")))
 ##replace scientific name of elko rockcress
 #species$Scientific.Name[which(species$Common.Name=="Elko Rockcress")] <- "Boechera falcifructa"
 #species$cutecode[which(species$Common.Name=="Elko Rockcress")] <- "boecfalc"
+species$cutecode[which(species$Common.Name=="Elko Rockcress")] <- "arabfalc2"
 
 ##add list of species to see if there is overlap with mobi models or other projects
 #spp<-read_excel("Data/WildlifeConservationInitiative-species-20220131.xlsx") %>% data.frame()
@@ -105,7 +106,7 @@ n.reviews<- reviews %>% group_by(ModelVersion, cutecode) %>% summarise(n.reviews
 
 ##write out reviewer info for hannah
 reviewer.contact <- reviews %>% subset(subset = cutecode %in% species$cutecode, select= c(UserID, cutecode, ModelVersion)) %>% data.frame(); head(reviewer.contact)
-write.csv(reviewer.contact, "Outputs/completedreviews-20220629.csv", row.names = F)
+write.csv(reviewer.contact, paste0("Outputs/completedreviews-", Sys.Date(), ".csv"), row.names = F)
 
 species.reviews<-left_join(x=species, y = n.reviewers)
 species.reviews<-full_join(x=species.reviews, y=subset(mrt.models.sub, cutecode %in% species$cutecode))
@@ -117,7 +118,7 @@ species.reviews$reviewed[which(is.na(species.reviews$reviewed))]<-F
 ##add 0 for species with no reviews
 species.reviews$n.reviews[which(is.na(species.reviews$n.reviews))]<-0
 
-subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "n.reviews"))
+subset(species.reviews, select=c("Project", "Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "n.reviews"))
 
 #write.csv(subset(species.reviews, select=c("Scientific.Name", "ModelVersion", "mrt2", "n.reviewer", "n.reviews"), Project=="FWS SE"), "Outputs/FWSSE_modelreviewcounts_20220715.csv", row.names = F)
 
@@ -257,7 +258,8 @@ fig.n.reviews
 #write.csv(species.reviews, "Outputs/Fed-project-species-reviews-20220624.csv", row.names=F)
 
 ##add list of mobi models
-mobimodels<-read_excel("G:/tarjan/Species-select/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
+#mobimodels<-read_excel("G:/tarjan/Species-select/Data/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
+mobimodels<-read_excel("C:/Users/max_tarjan/NatureServe/Map of Biodiversity Importance - Summary Tables/MoBI Modeling Summary by Species January 2021.xlsx", sheet = "MoBI_Model_Assessment", skip = 2) %>% data.frame()
 colnames(mobimodels)[3:7]<-c("cutecode", "Broad Group", "Taxonomic Group", "Scientific Name", "Common Name")
 
 ##view particular mobimodels
