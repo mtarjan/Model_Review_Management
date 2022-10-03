@@ -13,7 +13,7 @@ SpeciesMasterLookupRaster <- arc.open(specieslookup_url) %>% arc.select()
 ### Load data
 reviewer_signup <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/14oq_KQxD8KiOjg-RxrPdMplNUBHhBq3QJk3bU57xByU/edit?usp=sharing") %>% data.frame()
 #reviewer_signup <- read.csv("Data/Model Reviewer Sign Up Form - Responses - Sheet1.csv")
-SpeciesMasterLookupRaster <- read.csv("Data/SpeciesMasterLookupRaster-20221003.csv", fileEncoding="UTF-8-BOM") %>% dplyr::mutate(species = strsplit((strsplit(`Scientific.Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
+#SpeciesMasterLookupRaster <- read.csv("Data/SpeciesMasterLookupRaster-20221003.csv", fileEncoding="UTF-8-BOM") %>% dplyr::mutate(species = strsplit((strsplit(`Scientific.Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 SpeciesMasterLookupRaster <- SpeciesMasterLookupRaster %>%
   dplyr::mutate(species = strsplit((strsplit(`Scientific.Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 
