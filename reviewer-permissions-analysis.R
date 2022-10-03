@@ -3,7 +3,7 @@
 ### Load libraries
 library(tidyverse)
 library(readxl)
-#library(googlesheets4)
+library(googlesheets4)
 library(arcgisbinding)
 arc.check_product()
 
@@ -11,17 +11,17 @@ specieslookup_url <- "https://services.arcgis.com/EVsTT4nNRCwmHNyb/arcgis/rest/s
 SpeciesMasterLookupRaster <- arc.open(specieslookup_url) %>% arc.select()
 
 ### Load data
-#reviewer_signup <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/14oq_KQxD8KiOjg-RxrPdMplNUBHhBq3QJk3bU57xByU/edit?usp=sharing") 
-reviewer_signup <- read.csv("Data/Model Reviewer Sign Up Form - Responses - Sheet1.csv")
-#SpeciesMasterLookupRaster <- read_excel("Data/SpeciesMasterLookupRaster-20220202.xls") %>% dplyr::mutate(species = strsplit((strsplit(`Scientific_Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
+reviewer_signup <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/14oq_KQxD8KiOjg-RxrPdMplNUBHhBq3QJk3bU57xByU/edit?usp=sharing") %>% data.frame()
+#reviewer_signup <- read.csv("Data/Model Reviewer Sign Up Form - Responses - Sheet1.csv")
+SpeciesMasterLookupRaster <- read.csv("Data/SpeciesMasterLookupRaster-20221003.csv", fileEncoding="UTF-8-BOM") %>% dplyr::mutate(species = strsplit((strsplit(`Scientific.Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 SpeciesMasterLookupRaster <- SpeciesMasterLookupRaster %>%
-  dplyr::mutate(species = strsplit((strsplit(`Scientific_Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
+  dplyr::mutate(species = strsplit((strsplit(`Scientific.Name`, " \\(") %>% purrr::map(1)) %>% unlist(), ",") %>% purrr::map(1) %>% unlist())
 
 ### Generate reviewer permissions table
 #### Format required: ELEMENT_GLOBAL_ID, cutecode, Reviewer, Reviewer email, SpeciesMasterLookupKey, 
 #### Remove incomplete Sign Up rows - chase up on those individually via email
-reviewer_signup <- reviewer_signup %>% 
-  dplyr::filter(complete.cases(.))
+#reviewer_signup <- reviewer_signup %>% 
+#  dplyr::filter(complete.cases(.))
 #### Identiy unique species
 review_species <- purrr::map(reviewer_signup$`Selected.Species`, function(s) strsplit(s, ","))
 unique_review_species <- review_species %>% unlist() %>% unique()
