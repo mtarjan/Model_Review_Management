@@ -6,6 +6,7 @@
 ##https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r/
 
 library(tidyverse)
+library(googlesheets4)
 
 ##connecting to AGOL tables
 ##First, download the "arcgisbinding" package manually from GitHub: https://github.com/R-ArcGIS/r-bridge/releases/tag/v1.0.1.232. Second, install this package in Rstudio using the menu "Tools">"install packages", and then choose the downloaded package archive
@@ -87,6 +88,9 @@ mrt<-mrt[,1:4] %>% unique()
 colnames(mrt)<-c("ELEMENT_GLOBAL_ID", "cutecode.model","Reviewer","Reviewer_email")
 mrt$cutecode<-str_split(mrt$cutecode.model, pattern = "_", simplify = T)[,1]
 
+##READ IN REVIEWS FROM SHINY MORT
+mort_reviews <- googlesheets4::read_sheet(ss = "https://docs.google.com/spreadsheets/d/1OKpMQfHfU6TDXFwFb9Mnb4uQRiNq2ziD3MN4WUhhE1U/edit?usp=sharing") %>% data.frame()
+
 ##ADD MODEL REVIEWS; HOW MANY MODELS HAVE REVIEWS IN MRT2?
 #reviews<-read_excel("Data/OverallFeedbackRaster-20220309.xls", sheet = NULL) %>% data.frame()
 reviews<-overall_feedback_table
@@ -105,7 +109,18 @@ n.reviewers<- assigned.reviewers %>% group_by(cutecode) %>% summarise(n.reviewer
 n.reviews<- reviews %>% group_by(ModelVersion, cutecode) %>% summarise(n.reviews=length(unique(na.omit(UserID)))) %>% data.frame()
 
 ##write out reviewer info for hannah
-reviewer.contact <- reviews %>% subset(subset = cutecode %in% species$cutecode, select= c(UserID, cutecode, ModelVersion)) %>% data.frame(); head(reviewer.contact)
+reviewer.contact <- reviews %>% subset(subset = cutecode %in% species$cutecode, select= c(UserID, cutecode, ModelVersion)) %>% data.frame()
+reviewer.contact$app<-"AGOL"
+##reviewer id, and which model version they've reviewed, shiny vs agol, project that it's part of, review count for model version
+
+reviewer.contact.temp<-subset(mort_reviews, select = c(user, taxon_code, model_version))
+names(reviewer.contact.temp)<-names(reviewer.contact)[1:3]
+reviewer.contact.temp$app<-"Shiny"
+reviewer.contact<-rbind(reviewer.contact, reviewer.contact.temp); head(reviewer.contact)
+##read in SHM tracking database
+shm<-read_excel("Data/Network-SHM-database-20221010.xlsx", sheet = "model_status_table") %>% data.frame() %>% rename(cutecode=taxon_code, ModelVersion = model_version)
+##add project
+reviewer.contact <- left_join(reviewer.contact, subset(shm, select = c(ModelVersion, created_for_projects)))
 write.csv(reviewer.contact, paste0("Outputs/completedreviews-", Sys.Date(), ".csv"), row.names = F)
 
 species.reviews<-left_join(x=species, y = n.reviewers)
