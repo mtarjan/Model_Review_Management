@@ -125,7 +125,10 @@ reviewer.contact<-rbind(reviewer.contact, reviewer.contact.temp); head(reviewer.
 reviewer.contact <- left_join(reviewer.contact, subset(species, select = c(cutecode, Project)));  head(reviewer.contact)
 ##replace NA project with "not in tracking db"
 #reviewer.contact$created_for_projects[which(is.na(reviewer.contact$created_for_projects))]<-"modelversion missing from SHM database"
+##summarize number of reviews per model version
+n.reviews.all<-reviewer.contact %>% group_by(cutecode, ModelVersion, Project) %>% summarise(n.reviews=n()) %>% data.frame()
 write.csv(reviewer.contact, paste0("Outputs/completedreviews-", Sys.Date(), ".csv"), row.names = F)
+write.csv(n.reviews.all, paste0("Outputs/n-reviews-", Sys.Date(), ".csv"), row.names = F)
 
 species.reviews<-left_join(x=species, y = n.reviewers)
 species.reviews<-full_join(x=species.reviews, y=subset(mrt.models.sub, cutecode %in% species$cutecode))
