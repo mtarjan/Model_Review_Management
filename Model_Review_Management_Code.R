@@ -120,7 +120,9 @@ reviewer.contact<-rbind(reviewer.contact, reviewer.contact.temp); head(reviewer.
 ##read in SHM tracking database
 shm<-read_excel("Data/Network-SHM-database-20221010.xlsx", sheet = "model_status_table") %>% data.frame() %>% rename(cutecode=taxon_code, ModelVersion = model_version)
 ##add project
-reviewer.contact <- left_join(reviewer.contact, subset(shm, select = c(ModelVersion, created_for_projects)))
+reviewer.contact <- left_join(reviewer.contact, subset(shm, select = c(ModelVersion, created_for_projects)));  head(reviewer.contact)
+##replace NA project with "not in tracking db"
+reviewer.contact$created_for_projects[which(is.na(reviewer.contact$created_for_projects))]<-"modelversion missing from SHM database"
 write.csv(reviewer.contact, paste0("Outputs/completedreviews-", Sys.Date(), ".csv"), row.names = F)
 
 species.reviews<-left_join(x=species, y = n.reviewers)
